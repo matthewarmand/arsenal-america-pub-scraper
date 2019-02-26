@@ -27,58 +27,44 @@ class ArsenalAmericaPubsSpider(scrapy.Spider):
         return
 
     def process_pubs(self, pubs):
-        field_names = ['name', 'branch_hq', 'address', 'phone']
+        field_names = ['name', 'link', 'branch_hq', 'address', 'phone']
         with open('pubs-' + str(math.ceil(time.time())) + '.csv', 'w', newline='') as csvfile:
             pub_writer = csv.DictWriter(csvfile, field_names)
             pub_writer.writeheader()
             for pub in pubs:
-                pub_writer.writerow({'name': pub.name, 'branch_hq': pub.branch_hq, 'address': pub.address, 'phone': pub.phone})
+                pub_writer.writerow({'name': pub.name, 'link': pub.link, 'branch_hq': pub.branch_hq, 'address': pub.address, 'phone': pub.phone})
         return
 
     class Pub:
-        # Phone hacks:
-        #   A-Z in regex needed because Doyle's Public House has PINT as their last four
-        #   * after space in regex needed because a couple had no space between area code and number
-        #   replace needed because Library Square has a &nbsp; instead of a space
-        #   phone_index hack needed because Lahaina Coolers has an extra newline after phone number
-
-        phone_pattern = re.compile('\([0-9]{3}\)\s*[0-9]{3}[-.][0-9A-Z]{4}')
+        phone_pattern = r'\([0-9]{3}\)\s*[0-9]{3}[-.][0-9A-Z]{4}'
         def __init__(self, p_tag):
             self.valid = True
 
             a_tag = p_tag.css('a')
             name = a_tag.css('::text').get()
-            if name is not None and name.strip() != '':
+            # Must have link with name (not the twitter link)
+            if name is not None and name.strip() != '' and '@' not in name:
                 self.name = name
                 self.link = a_tag.attrib['href']
             else:
                 self.valid = False
                 return
 
-            all_text = p_tag.css('::text').getall()
-            if len(all_text) < 4:
+            all_text = ''.join(p_tag.css('::text').getall()).replace('\n', ' ').replace('&nbsp', ' ').strip()
+
+            if ':' in all_text:
+                all_text = all_text.split(':')[1].strip()
+
+            self.branch_hq = 'Emerging' if '**' in all_text else 'Branch' if '*' in all_text else 'NA'
+
+            phone = re.search(self.phone_pattern, all_text)
+            if phone:
+                self.phone = phone.group(0)
+            else:
                 self.valid = False
                 return
-   
-            # TODO fix this... seems busted currently
-            # TODO it may actually be more flexible to join all_text and use searches
-            branch_hq = all_text[1].replace('&nbsp', '').strip()
-            self.branch_hq = 'Branch' if branch_hq == '*' else 'Emerging' if branch_hq == '**' else 'No'
-            print(branch_hq + ', ' + self.branch_hq)
 
-            phone_index = -1
-            phone = all_text[-1].replace('&nbsp', ' ').strip()
-            if self.phone_pattern.match(phone):
-                self.phone = phone
-            else:
-                phone_2 = all_text[-2].replace('&nbsp', ' ').strip()
-                if self.phone_pattern.match(phone_2):
-                    self.phone = phone_2
-                    phone_index = -2
-                else:
-                    print('phone is not phone [' + phone + '] & [' + phone_2 + '] for name ' + name)
-                    self.valid = False
-                    return
-
-            self.address = (all_text[phone_index - 2] + all_text[phone_index - 1]).replace('\n', ' ').strip()
+            addr_start = all_text.find(self.name) + len(self.name)
+            addr_end = all_text.find(self.phone)
+            self.address = all_text[addr_start:addr_end].replace('*', '').strip()
 
