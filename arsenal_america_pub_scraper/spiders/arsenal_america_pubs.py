@@ -2,10 +2,10 @@
 import csv
 import math
 import re
-import scrapy
+from scrapy import Spider
 import time
 
-class ArsenalAmericaPubsSpider(scrapy.Spider):
+class ArsenalAmericaPubsSpider(Spider):
     name = 'arsenal_america_pubs'
     allowed_domains = ['www.arsenal.com/usa/news/features/arsenal-bars']
     start_urls = ['https://www.arsenal.com/usa/news/features/arsenal-bars/']
@@ -27,12 +27,12 @@ class ArsenalAmericaPubsSpider(scrapy.Spider):
         return
 
     def process_pubs(self, pubs):
-        field_names = ['name', 'link', 'branch_hq', 'address', 'phone']
+        field_names = ['Name', 'Link', 'Branch Status', 'Address', 'Phone']
         with open('pubs-' + str(math.ceil(time.time())) + '.csv', 'w', newline='') as csvfile:
             pub_writer = csv.DictWriter(csvfile, field_names)
             pub_writer.writeheader()
             for pub in pubs:
-                pub_writer.writerow({'name': pub.name, 'link': pub.link, 'branch_hq': pub.branch_hq, 'address': pub.address, 'phone': pub.phone})
+                pub_writer.writerow({'Name': pub.name, 'Link': pub.link, 'Branch Status': pub.branch_hq, 'Address': pub.address, 'Phone': pub.phone})
         return
 
     class Pub:
@@ -42,8 +42,7 @@ class ArsenalAmericaPubsSpider(scrapy.Spider):
 
             a_tag = p_tag.css('a')
             name = a_tag.css('::text').get()
-            # Must have link with name (not the twitter link)
-            if name is not None and name.strip() != '' and '@' not in name:
+            if name is not None and name.strip() != '':
                 self.name = name
                 self.link = a_tag.attrib['href']
             else:
@@ -55,7 +54,7 @@ class ArsenalAmericaPubsSpider(scrapy.Spider):
             if ':' in all_text:
                 all_text = all_text.split(':')[1].strip()
 
-            self.branch_hq = 'Emerging' if '**' in all_text else 'Branch' if '*' in all_text else 'NA'
+            self.branch_hq = 'Emerging' if '**' in all_text else 'Branch HQ' if '*' in all_text else 'NA'
 
             phone = re.search(self.phone_pattern, all_text)
             if phone:
