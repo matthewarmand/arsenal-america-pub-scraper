@@ -2,7 +2,7 @@
 This is the source code which can regularly scrape and export the official [Arsenal America Pubs page](http://www.arsenal.com/usa/news/features/arsenal-bars).
 
 This data is used to populate this [Google My Maps Layer](https://drive.google.com/open?id=1lGiu2QTjyGmUcSdNN6EeZFiUXv6CL4NR&usp=sharing).
-[[https://github.com/matthewarmand/arsenal-america-pub-scraper/blob/master/images/my-maps-layer.png]]
+![Find me on Google Maps!](images/my-maps-layer.png)
 
 The icon used in the Maps layer can be found [here](http://getdrawings.com/arsenal-cannon-vector#arsenal-cannon-vector-37.png)
 
@@ -20,7 +20,7 @@ scrapy shell http://www.arsenal.com/usa/news/features/arsenal-bars
 ```
 
 Currently, this is only a scraper which extracts the data as a CSV. Future plans would include deployment somewhere so this could be regularly run on a schedule.
-Ideally, we'd also be able to programatically update the [Google My Maps Layer](http://map-link-here). However, there currently is no API exposed for My Maps, so this may not be possible at this time.
+Ideally, we'd also be able to programatically update the [Google My Maps Layer](https://drive.google.com/open?id=1lGiu2QTjyGmUcSdNN6EeZFiUXv6CL4NR&usp=sharing). However, there currently is no API exposed for My Maps, so this may not be possible at this time.
 
 
 # Notes / Known Issues
