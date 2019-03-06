@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import csv
 import math
+import os
 import re
 from scrapy import Spider
 import time
@@ -17,8 +18,8 @@ class ArsenalAmericaPubsSpider(Spider):
         if mod_date != self.expected_article_date:
             print('Warning! Expected article date is ' +
                   self.expected_article_date + ' but actual is ' +
-                  mod_date)
-            print('Spider may be out of date. Check for DOM structure')
+                  mod_date + '. Spider may be out of date. ' +
+                  'Check for DOM structure changes')
 
         p_tags = response.css('p')
         pubs = []
@@ -26,6 +27,10 @@ class ArsenalAmericaPubsSpider(Spider):
             pub = self.Pub(p_tag)
             if pub.valid:
                 pubs.append(pub)
+
+        if len(pubs) > 1999:
+            print('Warning! Too many rows for Google Maps import')
+
         self.process_pubs(pubs)
         return
 
@@ -37,8 +42,10 @@ class ArsenalAmericaPubsSpider(Spider):
             'Address',
             'Phone'
         ]
+
+        file_name = 'pubs-' + str(math.ceil(time.time())) + '.csv'
         with open(
-            'pubs-' + str(math.ceil(time.time())) + '.csv',
+            file_name,
             'w',
             newline=''
         ) as csvfile:
@@ -52,6 +59,11 @@ class ArsenalAmericaPubsSpider(Spider):
                     'Address': pub.address,
                     'Phone': pub.phone
                 })
+
+        if os.path.getsize(file_name) >= 40000000:
+            print(
+                'Warning! File size may be too large for Google Maps import')
+
         return
 
     class Pub:
