@@ -3,11 +3,11 @@ import csv
 import math
 import os
 import re
-from scrapy import Spider
+import scrapy
 import time
 
 
-class ArsenalAmericaPubsSpider(Spider):
+class ArsenalAmericaPubsSpider(scrapy.Spider):
     name = 'arsenal_america_pubs'
     allowed_domains = ['www.arsenal.com/usa/news/features/arsenal-bars']
     start_urls = ['https://www.arsenal.com/usa/news/features/arsenal-bars/']
