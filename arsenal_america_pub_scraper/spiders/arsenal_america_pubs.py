@@ -5,6 +5,7 @@ import re
 from scrapy import Spider
 import time
 
+
 class ArsenalAmericaPubsSpider(Spider):
     name = 'arsenal_america_pubs'
     allowed_domains = ['www.arsenal.com/usa/news/features/arsenal-bars']
@@ -14,8 +15,10 @@ class ArsenalAmericaPubsSpider(Spider):
     def parse(self, response):
         mod_date = response.css('span.article-card-header__date::text').get()
         if mod_date != self.expected_article_date:
-            print('Warning! Expected article date is ' + self.expected_article_date + ' but actual is ' + mod_date)
-            print('Spider may be out of date')
+            print('Warning! Expected article date is ' +
+                  self.expected_article_date + ' but actual is ' +
+                  mod_date)
+            print('Spider may be out of date. Check for DOM structure')
 
         p_tags = response.css('p')
         pubs = []
@@ -27,16 +30,33 @@ class ArsenalAmericaPubsSpider(Spider):
         return
 
     def process_pubs(self, pubs):
-        field_names = ['Name', 'Link', 'Branch Status', 'Address', 'Phone']
-        with open('pubs-' + str(math.ceil(time.time())) + '.csv', 'w', newline='') as csvfile:
+        field_names = [
+            'Name',
+            'Link',
+            'Branch Status',
+            'Address',
+            'Phone'
+        ]
+        with open(
+            'pubs-' + str(math.ceil(time.time())) + '.csv',
+            'w',
+            newline=''
+        ) as csvfile:
             pub_writer = csv.DictWriter(csvfile, field_names)
             pub_writer.writeheader()
             for pub in pubs:
-                pub_writer.writerow({'Name': pub.name, 'Link': pub.link, 'Branch Status': pub.branch_hq, 'Address': pub.address, 'Phone': pub.phone})
+                pub_writer.writerow({
+                    'Name': pub.name,
+                    'Link': pub.link,
+                    'Branch Status': pub.branch_hq,
+                    'Address': pub.address,
+                    'Phone': pub.phone
+                })
         return
 
     class Pub:
         phone_pattern = r'\([0-9]{3}\)\s*[0-9]{3}[-.][0-9A-Z]{4}'
+
         def __init__(self, p_tag):
             self.valid = True
 
@@ -49,12 +69,16 @@ class ArsenalAmericaPubsSpider(Spider):
                 self.valid = False
                 return
 
-            all_text = ''.join(p_tag.css('::text').getall()).replace('\n', ' ').replace('&nbsp', ' ').strip()
+            all_text = ''.join(p_tag.css('::text').getall()) \
+                         .replace('\n', ' ') \
+                         .replace('&nbsp', ' ').strip()
 
             if ':' in all_text:
                 all_text = all_text.split(':')[1].strip()
 
-            self.branch_hq = 'Emerging' if '**' in all_text else 'Branch HQ' if '*' in all_text else 'NA'
+            self.branch_hq = 'Emerging' if '**' in all_text else \
+                             'Branch HQ' if '*' in all_text else \
+                             'NA'
 
             phone = re.search(self.phone_pattern, all_text)
             if phone:
@@ -65,5 +89,5 @@ class ArsenalAmericaPubsSpider(Spider):
 
             addr_start = all_text.find(self.name) + len(self.name)
             addr_end = all_text.find(self.phone)
-            self.address = all_text[addr_start:addr_end].replace('*', '').strip()
-
+            self.address = all_text[addr_start:addr_end].replace('*', '') \
+                                                        .strip()
