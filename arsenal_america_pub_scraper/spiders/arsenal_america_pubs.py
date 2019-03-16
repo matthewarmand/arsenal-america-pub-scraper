@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 import csv
-import math
+import datetime
 import os
 import re
 import scrapy
-import time
 
 
 class ArsenalAmericaPubsSpider(scrapy.Spider):
@@ -43,7 +42,8 @@ class ArsenalAmericaPubsSpider(scrapy.Spider):
             'Phone'
         ]
 
-        file_name = 'pubs-' + str(math.ceil(time.time())) + '.csv'
+        date_string = datetime.datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
+        file_name = 'pubs-' + date_string + '.csv'
         with open(
             file_name,
             'w',
