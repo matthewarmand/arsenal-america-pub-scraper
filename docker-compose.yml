@@ -1,0 +1,8 @@
+version: "3"
+services:
+  web:
+    restart: always
+    build: .
+    volumes:
+      - .:/code/arsenal_america_pub_scraper
+    command: ["scrapy", "crawl", "arsenal_america_pubs"]
