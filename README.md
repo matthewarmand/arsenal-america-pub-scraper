@@ -1,4 +1,7 @@
 # Arsenal America Pub Scraper
+
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 This is the source code which can regularly scrape and export the official [Arsenal America Pubs page](http://www.arsenal.com/usa/news/features/arsenal-bars).
 
 This data is used to populate this [Google My Maps Layer](https://drive.google.com/open?id=1lGiu2QTjyGmUcSdNN6EeZFiUXv6CL4NR&usp=sharing).
